@@ -1,25 +1,28 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { getAllPersons, createPerson, deletePerson, updatePerson } from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
-  useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(res => setPersons(res.data))
-  }, [])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+  useEffect(() => { getAllPersons().then(initialPersons => setPersons(initialPersons)) }, [])
+  useEffect(() => console.log('persons', persons), [persons])
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (persons.map(person => person.name).indexOf(newName) === -1) {
-      setPersons(persons.concat({name: newName, number: newNumber}))
+      createPerson({ name: newName, number: newNumber }).then(person => setPersons(persons.concat(person)))
       setNewName('')
       setNewNumber('')
     } else {
-      alert(`${newName} is already added to phonebook`)
+      if (confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const oldPerson = persons.find(p => p?.name === newName)
+        updatePerson(oldPerson?.id, {...oldPerson, number: newNumber}).then(p => setPersons(persons.filter(person => person.id !== oldPerson.id).concat(p)))
+        setNewName('')
+        setNewNumber('')
+      }
     }
   }
   
@@ -28,7 +31,7 @@ const App = () => {
       <h2>Phonebook</h2>
       <FilterForm filter={filter} setFilter={setFilter} />
       <AddPersonForm {...{newName, setNewName, newNumber, setNewNumber, handleSubmit}} />
-      <Persons persons={persons} filter={filter}/>
+      { persons ? <Persons persons={persons} setPersons={setPersons} filter={filter}/> : null }
     </div>
   )
 
@@ -51,12 +54,16 @@ const AddPersonForm = ({newName, setNewName, newNumber, setNewNumber, handleSubm
   </form>
   </>
 
-const Persons = ({persons, filter}) =>
+const Persons = ({persons, filter, setPersons}) =>
   <>
   <h2>Numbers</h2>
-  {persons.filter(person => person.name.includes(filter)).map((person, i) => <Person key={'person_' + i} person={person}/>)}
+  {persons?.filter(person => person?.name?.includes(filter)).map((person, i) => <Person key={'person_' + i} {...{ person, persons, setPersons }}/>)}
   </>
 
-const Person = ({person}) => <p>{person.name} {person.number}</p>
+const Person = ({person, persons, setPersons}) => 
+<>
+<p>{person.name} {person.number} <button onClick={() => deletePerson(person.id).then(p => setPersons(persons.filter(pe => pe.id !== p.id)))}>delete</button></p>
+
+</>
 
 export default App
