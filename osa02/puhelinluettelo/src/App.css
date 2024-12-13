@@ -1,0 +1,15 @@
+.message {
+    background-color: green;
+    border: 0.25em solid black;
+    border-radius: 0.5em;
+    text-align: center;
+    margin: 1em;
+}
+
+.error {
+    background-color: red;
+    border: 0.25em solid black;
+    border-radius: 0.5em;
+    text-align: center;
+    margin: 1em;
+}

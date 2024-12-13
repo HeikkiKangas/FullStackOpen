@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react'
 import { getAllPersons, createPerson, deletePerson, updatePerson } from './services/persons'
+import './App.css'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -23,8 +24,8 @@ const App = () => {
         setMessage(`Added "${newName}"`)
         setMsgStyle('message')
         setTimeout(() => setMessage(null), 5000)
-      setNewName('')
-      setNewNumber('')
+        setNewName('')
+        setNewNumber('')
       }).catch( e => {
         setMessage(`Could not add "${newName}": ${e.message}`)
         setMsgStyle('error')
@@ -40,8 +41,8 @@ const App = () => {
           setMessage(`Updated "${newName}"`)
           setMsgStyle('message')
           setTimeout(() => setMessage(null), 5000)
-        setNewName('')
-        setNewNumber('')
+          setNewName('')
+          setNewNumber('')
         }).catch( e => {
           setMessage(`Could not update "${newName}": ${e.message}`)
           setMsgStyle('error')
