@@ -2,27 +2,30 @@ const PORT = 3001
 
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 
 app.use(express.json())
+morgan.token('body', (req, res) => req.body ? JSON.stringify(req.body) : '')
+app.use(morgan(':method :url :status :response-time ms :body'))
 
 persons = [
   {
-    id: "1",
+    id: 1,
     name: "esa ase",
     number: "050-1234567"
   },
   {
-    id: "2",
+    id: 2,
     name: "ase esa",
     number: "050-1234568"
   },
   {
-    id: "3",
+    id: 3,
     name: "asd das",
     number: "050-1234569"
   },
   {
-    id: "4",
+    id: 4,
     name: "das asd",
     number: "050-1234560"
   },
@@ -33,7 +36,7 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
+  const id = +request.params.id
   const person = persons.find(p => p.id === id)
 
   if (person) {
@@ -44,7 +47,7 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
+  const id = +request.params.id
   const person = persons.find(p => p.id === id)
 
   if (person) {
@@ -79,6 +82,11 @@ app.get('/info', (request, response) => {
   response.send(
     `Phonebook has info for ${persons.length} people\n${new Date().toString()}`)
 })
+
+const unknownEndpoint = (req, res, next) => {
+  res.status(404).send({error: 'unknown endpoint'})
+}
+app.use(unknownEndpoint)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
