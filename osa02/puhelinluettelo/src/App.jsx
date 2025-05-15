@@ -27,7 +27,8 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       }).catch( e => {
-        setMessage(`Could not add "${newName}": ${e.message}`)
+        console.log(e.response.data)
+        setMessage(`Could not add "${newName}": ${e.response.data}`)
         setMsgStyle('error')
         setTimeout(() => setMessage(null), 5000)
       })
