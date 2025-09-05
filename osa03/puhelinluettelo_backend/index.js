@@ -9,7 +9,7 @@ const morgan = require('morgan')
 
 app.use(express.json())
 app.use(express.static('dist'))
-morgan.token('body', (req, res) => JSON.stringify(req.body))
+morgan.token('body', (req) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :response-time ms :body'))
 
 app.get('/api/persons', (request, response) => {
@@ -25,7 +25,7 @@ app.get('/api/persons/:id', (request, response) => {
       }
       response.json(person)
     })
-    .catch(e => response.status(400).send({ error: "malformed id" }))
+    .catch(() => response.status(400).send({ error: 'malformed id' }))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -87,7 +87,7 @@ app.get('/info', (request, response, next) => {
     .catch(e => next(e))
 })
 
-const unknownEndpoint = (req, res, next) => {
+const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'unknown endpoint' })
 }
 app.use(unknownEndpoint)

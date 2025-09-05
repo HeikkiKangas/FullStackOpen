@@ -4,8 +4,8 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 console.log(`MongoDB connecting to ${url}`)
 mongoose.connect(url)
-    .then(res => console.log('connected to MongoDB'))
-    .catch(e => console.log(`error connecting to MongoDB: ${e.message}`))
+  .then(() => console.log('connected to MongoDB'))
+  .catch(e => console.log(`error connecting to MongoDB: ${e.message}`))
 
 const personSchema = new mongoose.Schema({
   id: String,

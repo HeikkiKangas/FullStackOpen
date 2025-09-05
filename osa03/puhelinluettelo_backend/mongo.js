@@ -11,7 +11,7 @@ mongoose.set('strictQuery', false)
 const [pw, name, number] = args
 const url = `mongodb+srv://fullstack:${pw}@puhelinluettelo.dwtqlit.mongodb.net/?retryWrites=true&w=majority&appName=puhelinluettelo`
 mongoose.connect(url)
-  .then(res => {})
+  .then(() => {})
   .catch(e => console.log(`error connecting to MongoDB: ${e.message}`))
 
 const personSchema = new mongoose.Schema({
@@ -33,7 +33,7 @@ const listPeople = () => {
 }
 
 const addPerson = (name, number) => new Person({ name, number }).save()
-  .then(res => mongoose.connection.close())
+  .then(() => mongoose.connection.close())
   .catch(e => console.log(`error: ${e.message}`))
 
 if (name && number) {
