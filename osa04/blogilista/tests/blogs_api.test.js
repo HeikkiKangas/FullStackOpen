@@ -93,7 +93,40 @@ describe('blogs api', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
   })
+
+  test('delete first blog', async () => {
+    let response = await api.get('/api/blogs')
+    const id = response.body[0].id
+    await api
+      .delete(`/api/blogs/${id}`)
+      .expect(204)
+    response = await api.get('/api/blogs')
+    assert.strictEqual(response.body.length, initialBlogs.length - 1)
+  })
+
+  test('modify blog', async () => {
+    const newLikes = 100
+
+    let response = await api.get('/api/blogs')
+    const firstBlog = response.body[0]
+    firstBlog.likes = newLikes
+
+    response = await api.put(`/api/blogs/${firstBlog.id}`).send(firstBlog)
+    assert.strictEqual(response.body.likes, newLikes)
+  })
+
+  test('invalid id returns 404', async () => {
+    const newLikes = 100
+
+    let response = await api.get('/api/blogs')
+    const firstBlog = response.body[0]
+    firstBlog.likes = newLikes
+
+    await api.put('/api/blogs/68e101843d604a7bd8529bb2').send(firstBlog).expect(404)
+  })
 })
+
+
 
 after(async () => {
   await mongoose.connection.close()
