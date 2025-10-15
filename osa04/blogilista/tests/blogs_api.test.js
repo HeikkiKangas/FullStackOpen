@@ -129,5 +129,6 @@ describe('blogs api', () => {
 
 
 after(async () => {
+  Blog.deleteMany({})
   await mongoose.connection.close()
 })
