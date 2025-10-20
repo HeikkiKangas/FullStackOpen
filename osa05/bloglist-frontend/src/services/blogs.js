@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 const baseUrl = '/api/blogs'
 
 const getAll = () => {
@@ -6,7 +7,12 @@ const getAll = () => {
   return request.then(response => response.data)
 }
 
-const addBlog = ( token, title, author, url ) => {
+const getBlog = (id) => {
+  const request = axios.get(`/api/blogs/${id}`)
+  return request.then(response => response.data)
+}
+
+const addBlog = (token, title, author, url) => {
   const request = axios
     .post(
       baseUrl,
@@ -16,4 +22,23 @@ const addBlog = ( token, title, author, url ) => {
   return request.then(response => response.data)
 }
 
-export default { getAll, addBlog }
+export const updateBlog = (token, updatedBlog) => {
+  const request = axios
+    .put(
+      `${baseUrl}/${updatedBlog.id}`,
+      updatedBlog,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  return request.then(response => response.data)
+}
+
+export const deleteBlog = (token, id) => {
+  const request = axios
+    .delete(
+      `${baseUrl}/${id}`,
+      { headers: { Authorization: `Bearer ${ token }` } }
+    )
+  return request.then(response => response.data)
+}
+
+export default { getAll, getBlog, addBlog, updateBlog, deleteBlog }

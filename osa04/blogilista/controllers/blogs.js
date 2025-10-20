@@ -10,6 +10,11 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
+blogsRouter.get('/:id', async (request, response) => {
+  const blog = await Blog.findById(request.params.id).populate('user', {username: 1, name: 1})
+  return response.json(blog)
+})
+
 blogsRouter.post('/', userExtractor, async (request, response) => {
   if (!request.body.title || !request.body.url) {
     return response.status(400).send({error: 'Title or url missing'})
@@ -39,7 +44,7 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   if (!blog) {
     return response.status(404).send({error: 'Blog not found'})
   }
-  if (blog.user.toString() === request.user) {
+  if (blog?.user.toString() === request.user) {
     await Blog.findByIdAndDelete(blogId)
     response.status(204).end()
   } else {
@@ -49,7 +54,9 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
 
 blogsRouter.put('/:id', async (request, response, next) => {
   const {url, likes, title, author} = request.body
-  Blog.findById(request.params.id)
+  Blog
+    .findById(request.params.id)
+    .populate('user', {username: 1, name: 1})
     .then(blog => {
       if (!blog) {
         return response.status(404).send({error: 'Blog not found'})
