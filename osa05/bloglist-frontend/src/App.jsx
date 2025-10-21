@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import Blog from './components/Blog'
+import LoginForm from './components/LoginForm'
+import AddBlogForm from './components/AddBlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -45,6 +47,14 @@ const App = () => {
       })
   }
 
+  const handleLike = (blog) => {
+    const updatedBlog = { ...blog, likes: blog.likes + 1, user: blog.user.id }
+    blogService.updateBlog(user.token, updatedBlog)
+      .then(response => {
+        setBlogs(blogs.map(b => b.id === updatedBlog.id ? response : b).sort((a, b) => b.likes > a.likes ? 1 : -1))
+      })
+  }
+
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('user')
@@ -53,6 +63,20 @@ const App = () => {
       message: 'Logged out successfully'
     })
     setTimeout(() => setNotification(null), 5000)
+  }
+
+  const addBlog = (title, author, url) => {
+    blogService.addBlog(user.token, title, author, url).then(() => {
+      setNotification({
+        type: 'success',
+        message: `Added "${title}" successfully`
+      })
+      setTimeout(() => setNotification(null), 5000)
+      blogService.getAll().then(res => setBlogs(res.sort((a, b) => b.likes > a.likes ? 1 : -1)))
+    }).catch(e => {
+      setNotification({ type: 'error', message: e.response.data.error })
+      setTimeout(() => setNotification(null), 5000)
+    })
   }
 
   const notificationStyle = {
@@ -84,10 +108,10 @@ const App = () => {
             {user?.name ?? user.username} logged in
             <button onClick={handleLogout}>Log out</button>
 
-            <AddBlogForm {...{ user, setNotification, setBlogs }}/>
+            <AddBlogForm {...{ user, setNotification, setBlogs, addBlog }}/>
 
             {blogs.map(blog =>
-              <Blog key={blog.id} {...{ blog, token: user.token, blogs, setBlogs, user }}/>
+              <Blog key={blog.id} {...{ blog, token: user.token, blogs, setBlogs, user, handleLike }}/>
             )}
           </div>
           : showLoginForm
@@ -95,104 +119,6 @@ const App = () => {
             : <button onClick={ showLogin }>Login</button>
       }
     </div>
-  )
-}
-
-const LoginForm = ({ handleLogin, username, setUsername, password, setPassword, hideLogin }) => <div>
-  <h2>login</h2>
-  <form onSubmit={handleLogin}>
-    <div>
-      <label>
-        username
-        <input
-          type="text"
-          value={ username }
-          onChange={ (e) => setUsername(e.target.value) }
-        />
-      </label>
-    </div>
-    <div>
-      <label>
-        password
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </label>
-    </div>
-    <button type="submit">login</button>
-    <button onClick={hideLogin}>cancel</button>
-  </form>
-</div>
-
-const AddBlogForm = ({ user, setNotification, setBlogs }) => {
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-  const [formVisible, setFormVisible] = useState(false)
-  const hideWhenVisible = { display: formVisible ? 'none' : '' }
-  const showWhenVisible = { display: formVisible ? '' : 'none' }
-
-  const handleAddBlog = (e) => {
-    e.preventDefault()
-    blogService.addBlog(user.token, title, author, url).then(() => {
-      setNotification({
-        type: 'success',
-        message: `Added "${title}" successfully`
-      })
-      setTimeout(() => setNotification(null), 5000)
-      blogService.getAll().then(res => setBlogs(res.sort((a, b) => b.likes > a.likes ? 1 : -1)))
-    }).catch(e => {
-      setNotification({ type: 'error', message: e.response.data.error })
-      setTimeout(() => setNotification(null), 5000)
-    })
-  }
-
-  return (
-    <>
-      <div style={hideWhenVisible}>
-        <button onClick={() => setFormVisible(true)}>Add blog</button>
-      </div>
-      <div style={showWhenVisible}>
-        <form onSubmit={handleAddBlog}>
-          <div>
-            <label>
-              Title
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Author
-              <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Url
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <button type='submit'>Create</button>
-          </div>
-        </form>
-        <button onClick={() => setFormVisible(false)}>Cancel</button>
-      </div>
-    </>
   )
 }
 

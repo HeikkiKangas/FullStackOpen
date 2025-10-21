@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { updateBlog, deleteBlog } from '../services/blogs'
+import { deleteBlog } from '../services/blogs'
 
-const Blog = ({ blog, token, blogs, setBlogs, user }) => {
+const Blog = ({ blog, token, blogs, setBlogs, user, handleLike }) => {
   const [open, setOpen] = useState(false)
 
   const blogStyle = {
@@ -9,14 +9,6 @@ const Blog = ({ blog, token, blogs, setBlogs, user }) => {
     padding: '0.5rem',
     border: '3px solid black',
     borderRadius: '0.5rem',
-  }
-
-  const handleLike = () => {
-    const updatedBlog = { ...blog, likes: blog.likes + 1, user: blog.user.id }
-    updateBlog(token, updatedBlog)
-      .then(response => {
-        setBlogs(blogs.map(b => b.id === updatedBlog.id ? response : b).sort((a, b) => b.likes > a.likes ? 1 : -1))
-      })
   }
 
   const handleDelete = () => {
@@ -37,7 +29,7 @@ const Blog = ({ blog, token, blogs, setBlogs, user }) => {
             { blog.url }
             <br/>
             likes: { blog.likes }
-            <button onClick={ handleLike }>like</button>
+            <button onClick={ () => handleLike(blog) }>like</button>
             <br/>
             { blog.user?.name ?? blog.user?.username }
             <br/>
