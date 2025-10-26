@@ -27,8 +27,6 @@ const asObject = anecdote => {
 
 const initialState = anecdotesAtStart.map(asObject).sort(alphabeticalAnecdoteSorter)
 
-
-
 export const createVoteAction = (id) => ({
   type: 'VOTE',
   payload: { id }
@@ -54,10 +52,4 @@ export const anecdoteReducer = (state = initialState, action) => {
   default:
     return state
   }
-}
-
-export default {
-  anecdoteReducer,
-  createVoteAction,
-  createAddAnecdoteAction
 }

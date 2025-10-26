@@ -3,7 +3,12 @@ import { createVoteAction } from '../reducers/anecdoteReducer.js'
 
 const AnecdoteList = () => {
   const dispatch = useDispatch()
-  const anecdotes = useSelector(state => state)
+
+  const anecdotes = useSelector(({ anecdotes, filter }) =>
+    filter !== ''
+      ? anecdotes.filter((anecdote) => anecdote.content.toLowerCase().includes(filter))
+      : anecdotes
+  )
 
   const vote = id => {
     console.log('vote, id:', id)
@@ -11,8 +16,7 @@ const AnecdoteList = () => {
   }
 
   return (
-    <>
-      <h2>Anecdotes</h2>
+    <div>
       {anecdotes.map(anecdote => (
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
@@ -22,7 +26,7 @@ const AnecdoteList = () => {
           </div>
         </div>
       ))}
-    </>
+    </div>
   )
 }
 
