@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import Blog from './Blog'
+import BlogDetails from './BlogDetails.jsx'
 import userEvent from '@testing-library/user-event'
 
 const blog = {
@@ -17,7 +17,7 @@ const blog = {
 
 test('renders content', () => {
   render(
-    <Blog {...{
+    <BlogDetails {...{
       blog,
       token: '',
       blogs: [],
@@ -30,7 +30,7 @@ test('renders content', () => {
 })
 
 test('clicking the button shows blog details', async () => {
-  render(<Blog {...{
+  render(<BlogDetails {...{
     blog,
     token: '',
     blogs: [],
@@ -51,7 +51,7 @@ test('clicking the button shows blog details', async () => {
 test('clicking the like button twice calls event handler twice', async () => {
   const mockHandler = vi.fn()
 
-  render(<Blog {...{
+  render(<BlogDetails {...{
     blog,
     token: '',
     blogs: [],

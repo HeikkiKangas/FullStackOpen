@@ -10,20 +10,20 @@ const api = supertest(app)
 
 const initialBlogs = [
   {
-    title: "Blog 1",
+    title: "BlogDetails 1",
     author: "James",
     url: 'http://localhost:3001',
     likes: 5
   },
   {
-    title: "Blog 2",
+    title: "BlogDetails 2",
     author: "Jane",
     url: 'http://localhost:3002'
   }
 ]
 
 const newBlog = {
-  title: 'Blog 3',
+  title: 'BlogDetails 3',
   author: 'Jack',
   url: 'http://localhost:3005'
 }
@@ -89,7 +89,7 @@ describe('blogs api', () => {
   test('url is required', async () => {
     await api
       .post('/api/blogs')
-      .send({ author: 'James', title: 'Blog 4' })
+      .send({ author: 'James', title: 'BlogDetails 4' })
       .expect(400)
       .expect('Content-Type', /application\/json/)
   })

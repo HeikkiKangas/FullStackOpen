@@ -1,5 +1,5 @@
 import {useContext, useEffect, useState} from 'react'
-import Blog from './components/Blog'
+import BlogDetails from './components/BlogDetails.jsx'
 import LoginForm from './components/LoginForm'
 import AddBlogForm from './components/AddBlogForm'
 import blogService from './services/blogs'
@@ -7,11 +7,15 @@ import loginService from './services/login'
 import NotificationContext from "./NotificationContext.jsx";
 import Notification from "./components/Notification.jsx";
 import UserContext from "./UserContext.jsx";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
+import {useQuery} from "@tanstack/react-query"
+import {Route, Routes, useMatch} from "react-router-dom";
+import UsersList from "./components/UsersList.jsx"
+import UserDetails from "./components/UserDetails.jsx"
+import Blog from "./components/Blog.jsx"
+import Navbar from "./components/Navbar.jsx"
+import {Container, Button} from "@mui/material"
 
 const App = () => {
-  //const [blogs, setBlogs] = useState([])
-  //const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showLoginForm, setShowLoginForm] = useState(false)
@@ -30,13 +34,9 @@ const App = () => {
     enabled: !!user
   })
 
-  /*
-  useEffect(() => {
-    if (user) {
-      blogService.getAll().then(blogs => setBlogs(blogs.sort((a, b) => b.likes > a.likes ? 1 : -1)))
-    }
-  }, [user])
-  */
+  const match = useMatch('/blogs/:id')
+
+  const blog = match && blogs.isSuccess ? blogs.data.find(a => a.id === match.params.id) : null
 
   useEffect(() => {
     const savedUser = window.localStorage.getItem('user')
@@ -62,17 +62,6 @@ const App = () => {
       })
   }
 
-
-
-  const handleLike = (blog) => {
-    const updatedBlog = { ...blog, likes: blog.likes + 1, user: blog.user.id }
-
-    blogService.updateBlog(user.token, updatedBlog)
-      .then(response => {
-        //setBlogs(blogs.map(b => b.id === updatedBlog.id ? response : b).sort((a, b) => b.likes > a.likes ? 1 : -1))
-      })
-  }
-
   const handleLogout = () => {
     userDispatch({ type: 'LOG_OUT' })
     window.localStorage.removeItem('user')
@@ -83,27 +72,40 @@ const App = () => {
   const hideLogin = () => setShowLoginForm(false)
 
   return (
-    <div>
+    <Container>
       <Notification/>
       {
         user
-          ? <div>
-            <h2>blogs</h2>
-
+          ? <>
+            <Navbar />
+            <h2>Blogs</h2>
             {user?.name ?? user.username} logged in
-            <button onClick={handleLogout}>Log out</button>
+            <Button variant='outlined' onClick={handleLogout}>Log out</Button>
 
-            <AddBlogForm {...{user, showNotification}} />
-
-            {blogs?.data && blogs?.data?.sort((a, b) => a.likes > b.likes ? -1 : 1).map(blog =>
-              <Blog key={blog.id} {...{ blog, token: user.token, blogs, user, handleLike }}/>
-            )}
-          </div>
+            <Routes>
+              <Route path="/" element={
+                <div>
+                  <AddBlogForm {...{user, showNotification}} />
+                  <div style={{ marginTop: '0.5rem' }}>
+                  {
+                    blogs?.data && blogs?.data?.sort((a, b) => a.likes > b.likes ? -1 : 1)
+                    .map(blog =>
+                      <Blog key={blog.id} blog={blog}/>
+                    )
+                  }
+                  </div>
+                </div>
+              }/>
+              <Route path="/users/:id" element={<UserDetails user={user} />}/>
+              <Route path="/blogs/:id" element={<BlogDetails blog={blog} />}/>
+              <Route path="/users" element={<UsersList/>} />
+            </Routes>
+          </>
           : showLoginForm
             ? <LoginForm {...{ handleLogin, username, setUsername, password, setPassword, hideLogin }}/>
-            : <button onClick={ showLogin }>Login</button>
+            : <Button variant='outlined' onClick={ showLogin }>Login</Button>
       }
-    </div>
+    </Container>
   )
 }
 

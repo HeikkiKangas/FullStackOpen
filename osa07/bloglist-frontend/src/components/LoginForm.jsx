@@ -1,3 +1,4 @@
+import {Button} from '@mui/material'
 const LoginForm = ({ handleLogin, username, setUsername, password, setPassword, hideLogin }) => <div>
   <h2>login</h2>
   <form onSubmit={handleLogin}>
@@ -21,8 +22,8 @@ const LoginForm = ({ handleLogin, username, setUsername, password, setPassword, 
         />
       </label>
     </div>
-    <button type="submit">login</button>
-    <button onClick={hideLogin}>cancel</button>
+    <Button variant='outlined' type="submit">login</Button>
+    <Button variant='outlined' onClick={hideLogin}>cancel</Button>
   </form>
 </div>
 

@@ -1,6 +1,7 @@
 import {useState} from "react"
 import {useMutation, useQueryClient} from "@tanstack/react-query"
 import blogService from "../services/blogs.js"
+import {Button} from '@mui/material'
 
 const AddBlogForm = ({ user, showNotification }) => {
   const [title, setTitle] = useState('')
@@ -35,7 +36,7 @@ const AddBlogForm = ({ user, showNotification }) => {
   return (
     <>
       <div style={hideWhenVisible}>
-        <button onClick={() => setFormVisible(true)}>Add blog</button>
+        <Button variant='outlined' onClick={() => setFormVisible(true)}>Add blog</Button>
       </div>
       <div style={showWhenVisible}>
         <form onSubmit={handleAddBlog}>
@@ -69,11 +70,11 @@ const AddBlogForm = ({ user, showNotification }) => {
               />
             </label>
           </div>
-          <div>
-            <button type='submit'>Create</button>
+          <div style={{ margin: '0.5rem 0' }}>
+            <Button variant='outlined' type='submit'>Create</Button>
           </div>
         </form>
-        <button onClick={() => setFormVisible(false)}>Cancel</button>
+        <Button variant='outlined' onClick={() => setFormVisible(false)}>Cancel</Button>
       </div>
     </>
   )

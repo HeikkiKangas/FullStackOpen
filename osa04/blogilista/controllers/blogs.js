@@ -42,7 +42,7 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   const blogId = request.params.id
   const blog = await Blog.findById(blogId)
   if (!blog) {
-    return response.status(404).send({error: 'Blog not found'})
+    return response.status(404).send({error: 'BlogDetails not found'})
   }
   if (blog?.user.toString() === request.user) {
     await Blog.findByIdAndDelete(blogId)
@@ -59,7 +59,7 @@ blogsRouter.put('/:id', async (request, response, next) => {
     .populate('user', {username: 1, name: 1})
     .then(blog => {
       if (!blog) {
-        return response.status(404).send({error: 'Blog not found'})
+        return response.status(404).send({error: 'BlogDetails not found'})
       }
       blog.title = title
       blog.author = author
