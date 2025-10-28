@@ -1,6 +1,8 @@
 import {useState} from "react"
+import {useMutation, useQueryClient} from "@tanstack/react-query"
+import blogService from "../services/blogs.js"
 
-const AddBlogForm = ({ addBlog }) => {
+const AddBlogForm = ({ user, showNotification }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -8,10 +10,27 @@ const AddBlogForm = ({ addBlog }) => {
   const hideWhenVisible = { display: formVisible ? 'none' : '' }
   const showWhenVisible = { display: formVisible ? '' : 'none' }
 
+  const addBlogMutation = useMutation({
+    mutationFn: blogService.addBlog,
+    onSuccess: data => {
+      queryClient.invalidateQueries({queryKey: ['blogs']})
+      showNotification(`Add blog '${data.title}'`)
+      console.log('success', data)
+
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    },
+    onError: error => console.log(error)
+  })
+
   const handleAddBlog = (e) => {
     e.preventDefault()
-    addBlog(title, author, url)
+    console.log(title, author, url)
+    addBlogMutation.mutate({ user, title, author, url })
   }
+
+  const queryClient = useQueryClient()
 
   return (
     <>

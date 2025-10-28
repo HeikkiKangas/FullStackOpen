@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { deleteBlog } from '../services/blogs'
+import {deleteBlog, updateBlog} from '../services/blogs'
+import {useMutation, useQueryClient} from "@tanstack/react-query"
 
-const Blog = ({ blog, token, blogs, setBlogs, user, handleLike }) => {
+const Blog = ({ blog, user }) => {
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const blogStyle = {
     margin: '1rem 0',
@@ -11,11 +13,28 @@ const Blog = ({ blog, token, blogs, setBlogs, user, handleLike }) => {
     borderRadius: '0.5rem',
   }
 
+  const deleteBlogMutation = useMutation({
+    mutationFn: deleteBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
+
+  const likeBlogMutation = useMutation({
+    mutationFn: updateBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
+
+  const handleLike = () => {
+    likeBlogMutation.mutate({ user, updatedBlog: {...blog, likes: blog.likes + 1 } })
+  }
+
   const handleDelete = () => {
     const confirmation = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)
     if (confirmation) {
-      deleteBlog(token, blog.id)
-      setBlogs(blogs.filter(b => b.id !== blog.id))
+      deleteBlogMutation.mutate({ user, id: blog.id })
     }
   }
 

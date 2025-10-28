@@ -1,90 +1,82 @@
-import { useEffect, useState } from 'react'
+import {useContext, useEffect, useState} from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import AddBlogForm from './components/AddBlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import NotificationContext from "./NotificationContext.jsx";
+import Notification from "./components/Notification.jsx";
+import UserContext from "./UserContext.jsx";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
+  //const [blogs, setBlogs] = useState([])
+  //const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [notification, setNotification] = useState(null)
   const [showLoginForm, setShowLoginForm] = useState(false)
 
+  const { notificationDispatch } = useContext(NotificationContext)
+  const { user, userDispatch } = useContext(UserContext)
+
+  const showNotification = (payload) => {
+    notificationDispatch({ type: 'SET_NOTIFICATION', payload })
+    setTimeout(() => notificationDispatch({ type: 'CLEAR_NOTIFICATION' }), 5000)
+  }
+
+  const blogs = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+    enabled: !!user
+  })
+
+  /*
   useEffect(() => {
     if (user) {
       blogService.getAll().then(blogs => setBlogs(blogs.sort((a, b) => b.likes > a.likes ? 1 : -1)))
     }
   }, [user])
+  */
 
   useEffect(() => {
     const savedUser = window.localStorage.getItem('user')
     if (savedUser) {
-      setUser(JSON.parse(savedUser))
+      userDispatch({ type: 'LOG_IN', payload: JSON.parse(savedUser) })
     }
-  }, [])
+  }, [userDispatch])
 
   const handleLogin = (e) => {
     e.preventDefault()
     loginService
       .login(username, password)
       .then(result => {
-        setUser(result)
+        userDispatch({ type: 'LOG_IN', payload: result })
         window.localStorage.setItem('user', JSON.stringify(result))
         setUsername('')
         setPassword('')
-        setNotification({
-          type: 'success',
-          message: 'Login successfully'
-        })
-        setTimeout(() => setNotification(null), 5000)
+        showNotification('Login successfully')
       })
       .catch(e => {
-        setNotification({ type: 'error', message: e.response.data.error })
-        setTimeout(() => setNotification(null), 5000)
+        notificationDispatch({ type: 'SET_NOTIFICATION', payload: e.response.data.error })
+        setTimeout(() => notificationDispatch({ type: 'CLEAR_NOTIFICATION' }), 5000)
       })
   }
 
+
+
   const handleLike = (blog) => {
     const updatedBlog = { ...blog, likes: blog.likes + 1, user: blog.user.id }
+
     blogService.updateBlog(user.token, updatedBlog)
       .then(response => {
-        setBlogs(blogs.map(b => b.id === updatedBlog.id ? response : b).sort((a, b) => b.likes > a.likes ? 1 : -1))
+        //setBlogs(blogs.map(b => b.id === updatedBlog.id ? response : b).sort((a, b) => b.likes > a.likes ? 1 : -1))
       })
   }
 
   const handleLogout = () => {
-    setUser(null)
+    userDispatch({ type: 'LOG_OUT' })
     window.localStorage.removeItem('user')
-    setNotification({
-      type: 'success',
-      message: 'Logged out successfully'
-    })
-    setTimeout(() => setNotification(null), 5000)
-  }
-
-  const addBlog = (title, author, url) => {
-    blogService.addBlog(user.token, title, author, url).then(() => {
-      setNotification({
-        type: 'success',
-        message: `Added "${title}" successfully`
-      })
-      setTimeout(() => setNotification(null), 5000)
-      blogService.getAll().then(res => setBlogs(res.sort((a, b) => b.likes > a.likes ? 1 : -1)))
-    }).catch(e => {
-      setNotification({ type: 'error', message: e.response.data.error })
-      setTimeout(() => setNotification(null), 5000)
-    })
-  }
-
-  const notificationStyle = {
-    borderWidth: '5px',
-    borderStyle: 'solid',
-    borderRadius: '1rem',
-    backgroundColor: 'grey',
-    padding: '1rem'
+    showNotification('Logout successfully')
   }
 
   const showLogin = () => setShowLoginForm(true)
@@ -92,14 +84,7 @@ const App = () => {
 
   return (
     <div>
-      {
-        notification
-          ? <div style={{
-            borderColor: notification.type === 'success' ? 'green' : 'red',
-            ...notificationStyle
-          }}><h2 style={{ padding: 0, margin: 0 }}>{notification?.message}</h2></div>
-          : null
-      }
+      <Notification/>
       {
         user
           ? <div>
@@ -108,10 +93,10 @@ const App = () => {
             {user?.name ?? user.username} logged in
             <button onClick={handleLogout}>Log out</button>
 
-            <AddBlogForm {...{ user, setNotification, setBlogs, addBlog }}/>
+            <AddBlogForm {...{user, showNotification}} />
 
-            {blogs.map(blog =>
-              <Blog key={blog.id} {...{ blog, token: user.token, blogs, setBlogs, user, handleLike }}/>
+            {blogs?.data && blogs?.data?.sort((a, b) => a.likes > b.likes ? -1 : 1).map(blog =>
+              <Blog key={blog.id} {...{ blog, token: user.token, blogs, user, handleLike }}/>
             )}
           </div>
           : showLoginForm
