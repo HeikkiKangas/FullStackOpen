@@ -17,7 +17,7 @@ mongoose.connect(MONGODB_URI)
 const typeDefs = `
   type User {
     username: String!
-    favoriteGenre: String
+    favoriteGenre: String!
     id: ID!
   }
   
@@ -127,8 +127,8 @@ const resolvers = {
       const userForToken = { username, id: user._id }
       return { value: jwt.sign(userForToken, SECRET) }
     },
-    createUser: async (root, { username }) => {
-      const user = new User({ username })
+    createUser: async (root, { username, favoriteGenre }) => {
+      const user = new User({ username, favoriteGenre })
       return user.save().catch(e => {
         throw new GraphQLError('Saving user failed', {
           extensions: {
