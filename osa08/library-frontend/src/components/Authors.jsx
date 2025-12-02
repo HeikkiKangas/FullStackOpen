@@ -4,8 +4,8 @@ import { useState } from 'react'
 
 
 const Authors = (props) => {
-  const authors = useQuery(ALL_AUTHORS, { skip: !props.show })
-  const [name, setName] = useState(authors?.data ? authors.data.allAuthors[0].name : '')
+  const authors = useQuery(ALL_AUTHORS)
+  const [name, setName] = useState(authors?.data ? authors.data.allAuthors[0]?.name : '')
   const [born, setBorn] = useState('')
   const [editBorn] = useMutation(EDIT_BORN, { refetchQueries: [ALL_AUTHORS] })
 
@@ -35,10 +35,10 @@ const Authors = (props) => {
             <th>books</th>
           </tr>
           {authors?.data && authors?.data?.allAuthors?.map((a) => (
-            <tr key={a.name}>
-              <td>{a.name}</td>
-              <td>{a.born}</td>
-              <td>{a.bookCount}</td>
+            <tr key={a.name ?? ''}>
+              <td>{a.name ?? ''}</td>
+              <td>{a.born ?? ''}</td>
+              <td>{a.bookCount ?? ''}</td>
             </tr>
           ))}
         </tbody>
